@@ -40,4 +40,10 @@ The script works through the following steps to process the spreadsheet:
 
 8.) Applies alternating row backgrounds
 
-An example problem you may encounter: titles that include a year or that otherwise contain numbers more than three digits long will have those numbers deleted by step 4. This is just one example of a problem you might encounter; there are likely others.
+An example problem you may encounter: titles that include a year or that otherwise contain numbers more than three digits long will have those numbers deleted by step 4. This is just one example of a problem you might encounter; there are likely others. Feel free to download the files and repurpose for your own library. You can run all of this offline in a web browser if you have the files in the same directory or modify and upload them to your own github account. 
+
+Access the files here: https://github.com/vclsean/childrenstholdslistreformatter/
+Adult reformatter available here: https://vclsean.github.io/adultholdslistreformatter/index.html
+Files for adult reformatter here: https://github.com/vclsean/adultholdslistreformatter/
+
+-SEAN (VCL)
