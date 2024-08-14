@@ -40,22 +40,36 @@ document.getElementById('process-btn').addEventListener('click', function() {
 
 	rows.unshift(headerRow);
 
-
         // Process the first column
         rows = rows.map(row => {
             if (row.length > 0) {
                 let cell = row[0].toString();
-                // Remove numbers with more than three digits
-                cell = cell.replace(/\d{4,}/g, '');
-                // Remove spaces more than two in a row
-                cell = cell.replace(/\s{3,}/g, ' ');
-                // Format text before '/' as bold
+
+                // Step to identify and remove numbers and slashes
+                cell = cell.replace(/\b\d+\/|\d+\/\d+|\d+\/\b/g, '');
+
+                // Split cell at '/'
                 const parts = cell.split('/');
                 if (parts.length > 1) {
-                    row[0] = `<span class="bold">${parts[0]}</span>/${parts.slice(1).join('/')}`;
+                    // Process text before '/'
+                    const beforeSlash = parts[0];
+                    row[0] = `<span class="bold">${beforeSlash}</span>/${parts.slice(1).join('/')}`;
+                    // Process text after '/'
+                    let afterSlash = parts.slice(1).join('/');
+
+                    // Remove numbers more than three characters long after the '/'
+                    afterSlash = afterSlash.replace(/\d{4,}/g, '');
+
+                    // Rejoin the cell with bold text before '/'
+                    row[0] = `<span class="bold">${beforeSlash}</span>/${afterSlash}`;
                 } else {
-                    row[0] = cell;
+                    // Remove numbers more than three characters long if there's no '/'
+                    row[0] = cell.replace(/\d{4,}/g, '');
                 }
+
+                // Remove spaces more than two in a row
+                row[0] = row[0].replace(/\s{3,}/g, ' ');
+
                 // Delete all text after ", : "
                 const index = row[0].indexOf(", : ");
                 if (index !== -1) {
@@ -64,6 +78,18 @@ document.getElementById('process-btn').addEventListener('click', function() {
             }
             return row;
         });
+
+        // Bold text in the first column for rows without '/'
+        rows = rows.map(row => {
+            if (row.length > 0) {
+                let cell = row[0].toString();
+                if (!cell.includes('/')) {
+                    row[0] = `<span class="bold">${cell}</span>`;
+                }
+            }
+            return row;
+        });
+
 
         // Delete columns two, six, seven, and eight
         rows = rows.map(row => {
