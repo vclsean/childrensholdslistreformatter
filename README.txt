@@ -13,4 +13,4 @@ Adult reformatter available here: https://vclsean.github.io/adultholdslistreform
 Files for adult reformatter here: https://github.com/vclsean/adultholdslistreformatter/
 
 -SEAN (VCL)
-Email issues to: s.antonucci@rcls.org
+Email issues to: vclsean@gmail.com
