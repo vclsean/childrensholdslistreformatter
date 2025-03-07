@@ -103,10 +103,28 @@ function displayTable(data) {
         }
         tableHtml += '</tr>';
 
-        for (let i = 1; i < data.length; i++) {
+        // Calculate max width for "Call number" column
+        const callNumberIndex = data[0].indexOf("Call number");
+        let maxCallNumberWidth = 0;
+        if (callNumberIndex !== -1) {
+            for (let i = 1; i < data.length; i++) {
+                const callNumber = data[i][callNumberIndex];
+                if (callNumber) {
+                    maxCallNumberWidth = Math.max(maxCallNumberWidth, callNumber.length);
+                }
+            }
+        }
+
+        for (let i = 0; i < data.length; i++) {
+            if (i === 0) continue;
             tableHtml += '<tr>';
-            for (let cell of data[i]) {
-                tableHtml += '<td>' + (cell === undefined ? "" : cell) + '</td>';
+            for (let j = 0; j < data[i].length; j++) {
+                let cell = data[i][j];
+                if (j === callNumberIndex && callNumberIndex !== -1) {
+                    tableHtml += `<td style="width: ${maxCallNumberWidth * 8}px; white-space: nowrap; font-weight: bold;">${cell === undefined ? "" : cell}</td>`;
+                } else {
+                    tableHtml += '<td>' + (cell === undefined ? "" : cell) + '</td>';
+                }
             }
             tableHtml += '</tr>';
         }
