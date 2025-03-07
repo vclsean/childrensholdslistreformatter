@@ -26,10 +26,9 @@ document.getElementById('processButton').addEventListener('click', function() {
 function processSpreadsheet(data) {
     if (data.length < 3) return [];
 
-    data.splice(0, 1);  // Remove any unwanted headers (e.g., initial row)
-    data.splice(1, 1);  // Remove any unwanted rows (e.g., second row)
+    data.splice(0, 1);
+    data.splice(1, 1);
 
-    // Replace empty values in the second column with '---'
     for (let row of data) {
         if (row[1] === undefined || row[1] === null || row[1] === '') {
             row[1] = '---';
@@ -40,15 +39,11 @@ function processSpreadsheet(data) {
     const collectionIndex = headers.indexOf("Collection");
     const shelvingLocationIndex = headers.indexOf("Shelving location");
 
-    // Delete rows where "Collection" is "Adult Collection" or "Young Adult Collection"
-    // but do not delete if "Shelving location" contains "Parenting materials"
     if (collectionIndex !== -1 && shelvingLocationIndex !== -1) {
         data = data.filter((row, index) => {
-            if (index === 0) return true;  // Keep header row
+            if (index === 0) return true;
             const isAdultOrYoungAdult = row[collectionIndex] === "Adult Collection" || row[collectionIndex] === "Young Adult Collection";
             const isParentingMaterials = row[shelvingLocationIndex] && row[shelvingLocationIndex].includes("Parenting materials");
-
-            // Keep row if it's not an "Adult Collection" or "Young Adult Collection" or if "Shelving location" is "Parenting materials"
             return !(isAdultOrYoungAdult && !isParentingMaterials);
         });
     }
@@ -87,41 +82,35 @@ function processSpreadsheet(data) {
         }
     }
 
-const callNumberIndex = headers.indexOf("Call number");
-if (callNumberIndex !== -1) {
-    const rowsToDelete = [];
-    for (let i = 1; i < data.length; i++) {
-        if (data[i][callNumberIndex]) {
-            const callNumber = data[i][callNumberIndex];
-            if (callNumber.startsWith("YA ")) {
-                rowsToDelete.push(i);
+    const callNumberIndex = headers.indexOf("Call number");
+    if (callNumberIndex !== -1) {
+        const rowsToDelete = [];
+        for (let i = 1; i < data.length; i++) {
+            if (data[i][callNumberIndex]) {
+                const callNumber = data[i][callNumberIndex];
+                if (callNumber.startsWith("YA ")) {
+                    rowsToDelete.push(i);
+                }
             }
         }
+        rowsToDelete.sort((a, b) => b - a);
+        for (const rowIndex of rowsToDelete) {
+            data.splice(rowIndex, 1);
+        }
     }
-    rowsToDelete.sort((a, b) => b - a);
-    for (const rowIndex of rowsToDelete) {
-        data.splice(rowIndex, 1);
-    }
-
-    for (let row of data) {
-        const callNumber = row.splice(callNumberIndex, 1)[0];
-        row.unshift(callNumber);
-    }
-}
 
     if (data.length > 2) {
         const headerRow = data.shift();
         const shelvingIndex = headers.indexOf("Shelving location");
-        const callNumberIndexSort = headers.indexOf("Call number");
         const authorIndex = headers.indexOf("Author");
         const titleIndexSort = headers.indexOf("Title");
 
-        if (shelvingIndex !== -1 && callNumberIndexSort !== -1 && authorIndex !== -1 && titleIndexSort !== -1) {
+        if (shelvingIndex !== -1 && callNumberIndex !== -1 && authorIndex !== -1 && titleIndexSort !== -1) {
             data.sort((a, b) => {
                 if (a[shelvingIndex] > b[shelvingIndex]) return 1;
                 if (a[shelvingIndex] < b[shelvingIndex]) return -1;
-                if (a[callNumberIndexSort] > b[callNumberIndexSort]) return 1;
-                if (a[callNumberIndexSort] < b[callNumberIndexSort]) return -1;
+                if (a[callNumberIndex] > b[callNumberIndex]) return 1;
+                if (a[callNumberIndex] < b[callNumberIndex]) return -1;
                 if (a[authorIndex] > b[authorIndex]) return 1;
                 if (a[authorIndex] < b[authorIndex]) return -1;
                 if (a[titleIndexSort] > b[titleIndexSort]) return 1;
@@ -131,7 +120,6 @@ if (callNumberIndex !== -1) {
         }
         data.unshift(headerRow);
 
-        // Apply Shelving Location changes here, after the sort
         if (shelvingIndex !== -1) {
             for (let i = 1; i < data.length; i++) {
                 if (data[i][shelvingIndex] === "General Fiction") data[i][shelvingIndex] = "Fiction";
@@ -144,19 +132,28 @@ if (callNumberIndex !== -1) {
             }
         }
     }
-// Look in "Item type" column and change "Juvenile Book" to "Juv Book"
-const itemTypeIndex = headers.indexOf("Item type");
-if (itemTypeIndex !== -1) {
-    for (let i = 1; i < data.length; i++) {
-        if (data[i][itemTypeIndex] === "Juvenile Book") {
-            data[i][itemTypeIndex] = "Juv Book";
+    const itemTypeIndex = headers.indexOf("Item type");
+    if (itemTypeIndex !== -1) {
+        for (let i = 1; i < data.length; i++) {
+            if (data[i][itemTypeIndex] === "Juvenile Book") {
+                data[i][itemTypeIndex] = "Juv Book";
+            }
         }
     }
-}
 
+    // Reorder columns
+    const desiredOrder = ["Shelving location", "Call number", "Title", "Author", "Item type", "Barcode"];
+    const newIndices = desiredOrder.map(header => headers.indexOf(header));
+
+    if (newIndices.every(index => index !== -1)) {
+        const newData = data.map(row => newIndices.map(index => row[index]));
+        data = newData;
+        headers.splice(0, headers.length, ...desiredOrder);
+    }
 
     return data;
 }
+
 
 function displayTable(data) {
     let tableHtml = '<table id="outputTable">';
